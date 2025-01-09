@@ -19,7 +19,7 @@ jobs:
         with:
           script: |
             const actionInitiator = context.payload.sender.login;
-            const org = "Microsoft";
+            const org = "Azure-Samples";
             let isPublicMember = true;
 
             // Check if initiator is a public member of the org
@@ -51,6 +51,9 @@ jobs:
             return "";
           result-encoding: string
   run-samples:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     needs: check-if-external
     runs-on: ubuntu-latest
     # Require manual approval if initiator is not a public member of Azure-Samples
