@@ -1,16 +1,43 @@
 name: Run Samples
 on:
-  pull_request:
+  # By design pull_request_target event run against the version of the workflow in the target branch.
+  # So you have to merge changes to this workflow to observe the effects.
+  pull_request_target:
     branches:
       - main
     paths:
       - scenarios/**
       - .infra/deployments/**/*.bicep
 jobs:
-  run-samples:
+  check-if-external:
     runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-environment.outputs.result }}
+    steps:
+      - uses: actions/github-script@v7
+        id: set-environment
+        with:
+          script: |
+            const actionInitiator = context.payload.sender.login;
+            const isPublicMember = await octokit.rest.orgs.checkPublicMembershipForUser({
+              org: "Azure-Samples",
+              username: actionInitiator
+            });
+            const isPullRequestEvent = ["pull_request", "pull_request_target"].includes(context.eventName)
+            if (isPublicMember && isPullRequestEvent) {
+              return "external-contribution"
+            }
+            return ""
+          result-encoding: string
+  run-samples:
+    needs: check-if-external
+    runs-on: ubuntu-latest
+    # Require manual approval if initiator is not a public member of Azure-Samples
+    environment: ${{ needs.check-if-external.outputs.environment }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
       - uses: actions/setup-python@v5
         with:
             python-version: "3.9"
