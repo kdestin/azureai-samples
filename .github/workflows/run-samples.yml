@@ -19,16 +19,31 @@ jobs:
         with:
           script: |
             const actionInitiator = context.payload.sender.login;
-            const isPublicMember = await github.rest.orgs.checkPublicMembershipForUser({
-              org: "Azure-Samples",
-              username: actionInitiator
-            });
-            const isPullRequestEvent = ["pull_request", "pull_request_target"].includes(context.eventName)
-            console.log({isPublicMember, isPullRequestEvent})
-            if (isPublicMember && isPullRequestEvent) {
-              return "external-contribution"
+            const org = "Azure-Samples";
+            let isPublicMember = true;
+
+            // Check if initiator is a public member of the org
+            try {
+              await github.rest.orgs.checkPublicMembershipForUser({
+                org,
+                username: actionInitiator
+              });
+            } catch (error) {
+              if (error.status != 404) {
+                throw new Error("Unknown error", {cause: error});
+              }
+
+              console.debug(`User is not a public member of the organization ${org}`);
+              isPublicMember = false;
             }
-            return ""
+
+
+            const isPullRequestEvent = ["pull_request", "pull_request_target"].includes(context.eventName);
+
+            if (!(isPublicMember && isPullRequestEvent)) {
+              return "external-contribution";
+            }
+            return "";
           result-encoding: string
   run-samples:
     needs: check-if-external
