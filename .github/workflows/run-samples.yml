@@ -75,10 +75,11 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Deploy resources
         run: |
+            principalId="$(az ad signed-in-user show -o tsv --query id)"
             az deployment sub create --location eastus \
               --template-file .infra/deployment/main.bicep \
               --parameters principalType=ServicePrincipal \
-              --parameters principalId=${{ secrets.AZURE_CLIENT_ID }} \
+              --parameters principalId="$principalId" \
               -o json > deployment.json
       - name: Run samples
         run:
