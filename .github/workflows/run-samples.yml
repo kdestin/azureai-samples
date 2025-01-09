@@ -19,7 +19,7 @@ jobs:
         with:
           script: |
             const actionInitiator = context.payload.sender.login;
-            const isPublicMember = await octokit.rest.orgs.checkPublicMembershipForUser({
+            const isPublicMember = await github.rest.orgs.checkPublicMembershipForUser({
               org: "Azure-Samples",
               username: actionInitiator
             });
