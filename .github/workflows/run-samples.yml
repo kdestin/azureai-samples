@@ -19,7 +19,7 @@ jobs:
         with:
           script: |
             const actionInitiator = context.payload.sender.login;
-            const org = "Azure-Samples";
+            const org = "Microsoft";
             let isPublicMember = true;
 
             // Check if initiator is a public member of the org
@@ -33,7 +33,12 @@ jobs:
                 throw new Error("Unknown error", {cause: error});
               }
 
-              console.debug(`User is not a public member of the organization ${org}`);
+              console.debug([
+                `User is not a public member of the organization "${org}"`,
+                "",
+                `If you are a Microsoft employee, you can join the "${org}" org and set your org membership visibility to public: https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-your-membership-in-organizations/publicizing-or-hiding-organization-membership#changing-the-visibility-of-your-organization-membership`
+              ].join("\n"));
+
               isPublicMember = false;
             }
 
