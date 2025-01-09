@@ -75,7 +75,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - name: Deploy resources
         run: |
-            principalId="$(az ad signed-in-user show -o tsv --query id)"
+            principalId="$(az ad sp show --id ${{ secrets.AZURE_CLIENT_ID }} -o tsv --query id)"
             az deployment sub create --location eastus \
               --template-file .infra/deployment/main.bicep \
               --parameters principalType=ServicePrincipal \
