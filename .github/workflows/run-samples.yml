@@ -24,6 +24,7 @@ jobs:
               username: actionInitiator
             });
             const isPullRequestEvent = ["pull_request", "pull_request_target"].includes(context.eventName)
+            console.log({isPublicMember, isPullRequestEvent})
             if (isPublicMember && isPullRequestEvent) {
               return "external-contribution"
             }
